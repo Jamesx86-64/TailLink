@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TailLink</title>
+</head>
+<body>
+  <header>
+    <h1>TailLink</h1>
+  </header>
+  <main>
+    <p>Sign Up</p>
+    <input type="text" id="signUpUserField" placeholder="Username">
+    <input type="text" id="signUpEmailField" placeholder="Email">
+    <input type="text" id="signUpPhoneField" placeholder="Phone">
+    <p></p>
+    <input type="text" id="signUpPasswordField" placeholder="Password">
+    <input type="text" id="signUpConfirmPasswordField" placeholder="Confirm Password">
+    <button id="signUp">Sign Up</button>
+    <p>Login</p>
+    <input type="text" id="loginUserField" placeholder="Username, Email, or Phone">
+    <p></p>
+    <input type="text" id="loginPasswordField" placeholder="Password">
+    <button id="loginBtn">Log In</button>
+    <script>
+      document.getElementById('loginBtn').addEventListener('click', async () => {
+        const loginUserField = document.getElementById('loginUserField').value;
+        const loginPasswordField = document.getElementById('loginPasswordField').value;
+
+        const response = await fetch('/log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ loginUserField, loginPasswordField })
+        });
+      });
+    </script>
+  </main>
+  <footer>© 2025 James Hollister</footer>
+</body>
+</html>

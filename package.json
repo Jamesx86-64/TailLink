@@ -1,0 +1,10 @@
+{
+  "name": "taillink",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "A web app that helps users discover adoptable animals near them, filter by species, age, size, and temperament, and contact shelters to start the adoption process.",
+  "main": "src/app.js",
+  "author": "James Hollister",
+  "license": "SSPL",
+  "dependencies": { "pg": "^8.16.3" }
+}
