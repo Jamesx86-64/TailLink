@@ -8,46 +8,16 @@
 </head>
 <body>
   <header>
+    <div class="header-spacer"></div>
     <h1>TailLink</h1>
+    <nav class="nav-links">
+      <a href="/login">Login</a>
+      <a href="/signup" class="signup">Sign Up</a>
+    </nav>
   </header>
   <main>
-    <p>Sign Up</p>
-    <input type="text" id="signUpUserField" placeholder="Username">
-    <input type="text" id="signUpEmailField" placeholder="Email">
-    <input type="text" id="signUpPhoneField" placeholder="Phone">
-    <p></p>
-    <input type="text" id="signUpPasswordField" placeholder="Password">
-    <input type="text" id="signUpConfirmPasswordField" placeholder="Confirm Password">
-    <button id="signUp" onclick="signUp()" >Sign Up</button>
-    <p>Login</p>
-    <input type="text" id="loginUserField" placeholder="Username, Email, or Phone">
-    <p></p>
-    <input type="text" id="loginPasswordField" placeholder="Password">
-    <button id="loginBtn" onclick="login()" >Log In</button>
-    <form action=""> 
-    <p></p>
-    <select name="customers" onchange="showCustomer(this.value)">
-    <option value="">Select a customer:</option>
-    <option value="jameshollister">James Hollister</option>
-    </select>
-    </form>
-    <script>
-      function showCustomer(str) {
-        if (str == "") { return; }
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-          if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("txtHint").innerHTML = this.responseText;
-          }
-        };
-        try {
-          xhttp.open("GET", "getcustomer.php?q="+str, true)
-        } catch (err) {
-          xhttp.send('Error:', err)
-        }
-      }
-    </script>
+    <p>Welcome To TailLink</p>
   </main>
-  <footer>© 2025 James Hollister</footer>
+  <footer>© 2025 TailLink</footer>
 </body>
 </html>

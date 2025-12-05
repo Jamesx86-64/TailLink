@@ -4,15 +4,21 @@ body {
     padding: 0;
     background-color: #ffffff;
 }
+
 header {
     background-color: #333;
     color: white;
     padding: 1rem;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
 }
+
 main {
     padding: 2rem;
 }
+
 footer {
     background-color: #333;
     color: white;
@@ -21,4 +27,24 @@ footer {
     position: fixed;
     bottom: 0;
     width: 100%;
+}
+
+.nav-links {
+    position: absolute;
+    right: 1rem;
+    display: flex;
+    gap: 10px;
+}
+
+.nav-links a {
+    padding: 8px 14px;
+    background-color: #555;
+    border-radius: 4px;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav-links a:hover {
+    background-color: #777;
 }

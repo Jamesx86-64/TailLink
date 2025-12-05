@@ -1,35 +1,51 @@
-import http from 'http'
-import fs from 'fs/promises'
-import path from 'path';
-import { fileURLToPath } from 'url';
-import * as db from './db/index.js'
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import http from "http";
 
-let indexFile
-let styleFile
+const app = express();
+const server = http.createServer(app);
 
-indexFile = await fs.readFile(path.dirname(fileURLToPath(import.meta.url)) + '/public/index.html')
-styleFile = await fs.readFile(path.dirname(fileURLToPath(import.meta.url)) + '/public/style.css')
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const publicDir = path.join(__dirname, "public");
 
-const requestListener = async function (req, res) {
-  switch (req.url) {
-    case "/style.css":
-      res.writeHead(200, { 'Content-Type': 'text/css' })
-      res.end(styleFile)
-      break
-    default:
-      res.writeHead(200, { 'Content-Type': 'text/html' })
-      res.end(indexFile)
-  }
-}
+app.use(express.static(publicDir));
 
-const server = http.createServer(requestListener)
+app.get("/", (req, res) => {
+  res.sendFile(path.join(publicDir, "index.html"));
+});
+
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(publicDir, "login.html"));
+});
+
+app.get("/signup", (req, res) => {
+  res.sendFile(path.join(publicDir, "signup.html"));
+});
+
+let serverInstance = null;
 
 export async function init(port = 8080) {
+  server.on("connection", (socket) => {
+    console.log("[TCP] New connection from", socket.remoteAddress);
+  });
+  app.use((req, res, next) => {
+    console.log(`[HTTP] ${req.method} ${req.url} from ${req.ip}`);
+    next();
+  });
   return new Promise((resolve) => {
-    server.listen(port, () => {
-      const msg = `Server started on 127.0.0.1:${port}`
-      console.log(msg)
-      resolve(msg)
-    })
-  })
+    serverInstance = server.listen(port, () => {
+      resolve(`Server started on 127.0.0.1:${port}`);
+    });
+  });
+}
+
+export function close() {
+  return new Promise((resolve, reject) => {
+    if (!serverInstance) return resolve("Server not running");
+    serverInstance.close((err) => {
+      if (err) reject(err);
+      else resolve("Server closed");
+    });
+  });
 }
