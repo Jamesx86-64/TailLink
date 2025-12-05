@@ -18,23 +18,34 @@
     <p></p>
     <input type="text" id="signUpPasswordField" placeholder="Password">
     <input type="text" id="signUpConfirmPasswordField" placeholder="Confirm Password">
-    <button id="signUp">Sign Up</button>
+    <button id="signUp" onclick="signUp()" >Sign Up</button>
     <p>Login</p>
     <input type="text" id="loginUserField" placeholder="Username, Email, or Phone">
     <p></p>
     <input type="text" id="loginPasswordField" placeholder="Password">
-    <button id="loginBtn">Log In</button>
+    <button id="loginBtn" onclick="login()" >Log In</button>
+    <form action=""> 
+    <p></p>
+    <select name="customers" onchange="showCustomer(this.value)">
+    <option value="">Select a customer:</option>
+    <option value="jameshollister">James Hollister</option>
+    </select>
+    </form>
     <script>
-      document.getElementById('loginBtn').addEventListener('click', async () => {
-        const loginUserField = document.getElementById('loginUserField').value;
-        const loginPasswordField = document.getElementById('loginPasswordField').value;
-
-        const response = await fetch('/log', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ loginUserField, loginPasswordField })
-        });
-      });
+      function showCustomer(str) {
+        if (str == "") { return; }
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+          document.getElementById("txtHint").innerHTML = this.responseText;
+          }
+        };
+        try {
+          xhttp.open("GET", "getcustomer.php?q="+str, true)
+        } catch (err) {
+          xhttp.send('Error:', err)
+        }
+      }
     </script>
   </main>
   <footer>© 2025 James Hollister</footer>

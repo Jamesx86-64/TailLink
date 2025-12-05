@@ -6,5 +6,13 @@
   "main": "src/app.js",
   "author": "James Hollister",
   "license": "SSPL",
-  "dependencies": { "pg": "^8.16.3" }
+  "dependencies": {
+    "better-sqlite3": "^12.5.0",
+    "express": "^5.2.1"
+  },
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  }
 }
+

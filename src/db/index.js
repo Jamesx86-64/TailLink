@@ -1,114 +1,111 @@
-import pkg from 'pg'
+import Database from 'better-sqlite3'
 import crypto from 'crypto'
 
-const { Client } = pkg
+let db
 
-const client = new Client({
-  host: 'localhost',
-  port: 5432,
-  user: 'james', // TODO change
-  database: 'TailLinkDB',
-})
+export function init(dbName = 'app.db') {
+  db = new Database(dbName)
 
-export async function init() {
-  try {
-    await client.connect()
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      first_name TEXT,
+      last_name TEXT,
+      username TEXT UNIQUE NOT NULL,
+      email TEXT UNIQUE,
+      phone TEXT UNIQUE,
+      password_hash TEXT NOT NULL,
+      password_salt TEXT NOT NULL
+    )
+  `).run()
 
-    await client.query(`
-      CREATE EXTENSION IF NOT EXISTS citext;
-      CREATE TABLE IF NOT EXISTS users (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        first_name CITEXT,
-        last_name CITEXT,
-        username CITEXT UNIQUE NOT NULL,
-        email CITEXT UNIQUE,
-        phone CITEXT UNIQUE,
-        password_hash VARCHAR(128) NOT NULL,
-        password_salt VARCHAR(32) NOT NULL
-      );
-      CREATE TABLE IF NOT EXISTS shelters (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name VARCHAR(100) UNIQUE,
-        username VARCHAR(50) UNIQUE NOT NULL,
-        address VARCHAR(255) UNIQUE,
-        phone CITEXT UNIQUE,
-        email VARCHAR(100) UNIQUE,
-        website VARCHAR(100) UNIQUE
-      );
-      CREATE TABLE IF NOT EXISTS animals (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name VARCHAR(100),
-        species VARCHAR(50),
-        breed VARCHAR(100),
-        age INT,
-        shelter_id INT REFERENCES shelters(id)
-      );
-    `)
-  } catch (err) {
-    console.error('Error:', err)
-  }
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS shelters (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE,
+      username TEXT UNIQUE NOT NULL,
+      address TEXT UNIQUE,
+      phone TEXT UNIQUE,
+      email TEXT UNIQUE,
+      website TEXT UNIQUE
+    )
+  `).run()
+
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS animals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      species TEXT,
+      breed TEXT,
+      age INTEGER,
+      shelter_id INTEGER REFERENCES shelters(id)
+    )
+  `).run()
+
+  return `Database ${dbName} Initialized`
 }
 
-export async function addUser(first_name, last_name, username, email, phone, password) {
+export function addUser(first_name, last_name, username, email, phone, password) {
   try {
     const salt = crypto.randomBytes(16).toString('hex')
     const hash = crypto.scryptSync(password, salt, 64).toString('hex')
 
-    await client.query(`
+    db.prepare(`
       INSERT INTO users (first_name, last_name, username, email, phone, password_hash, password_salt)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-    `, [first_name, last_name, username, email, phone, hash, salt])
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(first_name, last_name, username, email, phone, hash, salt)
 
-    return "Success"
+    return "User Added"
   } catch (err) {
     console.error('Error:', err)
+    return "Error Adding User"
   }
 }
 
-export async function addShelters(name, address, phone, email, website) {
+export function addShelter(name, username, address, phone, email, website) {
   try {
-    await client.query(`
-      INSERT INTO shelters (name, address, phone, email, website)
-      VALUES ($1, $2, $3, $4, $5)
-    `, [name, address, phone, email, website])
+    db.prepare(`
+      INSERT INTO shelters (name, username, address, phone, email, website)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(name, username, address, phone, email, website)
+
+    return "Shelter Added"
   } catch (err) {
     console.error('Error:', err)
+    return "Error Adding Shelter"
   }
 }
 
-export async function addAnimal(name, species, breed, age, shelter_id) {
+export function addAnimal(name, species, breed, age, shelter_id) {
   try {
-    await client.query(`
+    db.prepare(`
       INSERT INTO animals (name, species, breed, age, shelter_id)
-      VALUES ($1, $2, $3, $4, $5)
-    `, [name, species, breed, age, shelter_id])
+      VALUES (?, ?, ?, ?, ?)
+    `).run(name, species, breed, age, shelter_id)
+
+    return "Animal Added"
   } catch (err) {
     console.error('Error:', err)
+    return "Error Adding Animal"
   }
 }
 
-export async function userLogin(login, password) {
+export function userLogin(login, password) {
   try {
-    if (!login || !password) {
-      return "Invalid Input"
-    }
-    const result = await client.query(`
-      SELECT id, password_hash, password_salt 
-      FROM users 
-      WHERE username = $1 OR email = $1 OR phone = $1
-      LIMIT 1;
-    `, [login])
+    if (!login || !password) return "Invalid Input"
 
-    if (result.rows[0]) {
-      if (crypto.scryptSync(password, result.rows[0].password_salt, 64).toString('hex') == result.rows[0].password_hash)
-        return "Login Success"
-      else
-        return "Invalid Password"
-    }
-    else {
-      return "Invalid User"
-    }
+    const row = db.prepare(`
+      SELECT * FROM users WHERE username = ? OR email = ? OR phone = ?
+    `).get(login, login, login)
+
+    if (!row) return "Invalid User"
+
+    const hash = crypto.scryptSync(password, row.password_salt, 64).toString('hex')
+    return hash === row.password_hash ? "Login Success" : "Invalid Password"
+
   } catch (err) {
     console.error('Error:', err)
+    return "Error Logging In"
   }
 }
+

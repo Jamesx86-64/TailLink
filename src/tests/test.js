@@ -1,8 +1,18 @@
 import test from 'node:test'
 import assert from 'assert/strict'
 import * as db from '../db/index.js'
+import * as server from '../server.js'
 
-db.init()
+test('Test Database Initialization', async () => {
+  const db_name = ':memory:'
+  const result = await db.init(db_name)
+  assert.equal(result, `Database ${db_name} Initialized`)
+})
+
+test('Test Add Valid User', async () => {
+  const result = await db.addUser("John", "Doe", "jondoe", "example@email.com", "1234567890", "Password")
+  assert.equal(result, "User Added")
+})
 
 test('Test Valid Username Login', async () => {
   const result = await (db.userLogin("jondoe", "Password"))
@@ -47,4 +57,10 @@ test('Test No Input', async () => {
 test('Test One Input', async () => {
   const result = await (db.userLogin("jondoe"))
   assert.equal(result, "Invalid Input")
+})
+
+test('Test Server Start', async () => {
+  const port = 8080
+  const result = await (server.init(port))
+  assert.equal(result, `Server started on 127.0.0.1:${port}`)
 })
